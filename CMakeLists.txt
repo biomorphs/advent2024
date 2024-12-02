@@ -11,4 +11,4 @@ if (MSVC)
   add_compile_options(/MP)		# Multi-processor compilation (off by default)
 endif ()
 
-add_subdirectory(day1)
+add_subdirectory(source)

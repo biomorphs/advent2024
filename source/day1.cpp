@@ -44,7 +44,7 @@ int main(int argc, char** args)
 {
 	std::cout << std::format("Day 1!") << std::endl;
 
-	std::filesystem::path inputPath = std::filesystem::absolute("input.txt");
+	std::filesystem::path inputPath = std::filesystem::absolute("data/day1/input.txt");
 	std::string inputData = LoadTextFile(inputPath);
 	if (inputData.length() == 0)
 	{

@@ -63,8 +63,6 @@ bool ReportIsSafeWithProblemDamper(const Report& r)
 	return false;
 }
 
-
-
 int main(int argc, char** args)
 {
 	Print("Day 2!");

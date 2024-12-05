@@ -1,31 +1,9 @@
-#include <fstream>
+#include "utils.h"
 #include <sstream>
-#include <iostream>
-#include <filesystem>
-#include <format>
 #include <vector>
 
 using Level = int32_t;
 using Report = std::vector<Level>;
-
-std::string LoadTextFile(const std::filesystem::path& textPath)
-{
-	std::string resultBuffer;
-	std::ifstream fileStream(textPath.string().data(), std::ios::in);
-	if (fileStream.is_open())
-	{
-		fileStream.seekg(0, fileStream.end);
-		const size_t fileSize = fileStream.tellg();
-		fileStream.seekg(0, fileStream.beg);
-
-		resultBuffer.resize(fileSize);
-		fileStream.read(resultBuffer.data(), fileSize);
-
-		size_t actualSize = strlen(resultBuffer.data());
-		resultBuffer.resize(actualSize);
-	}
-	return resultBuffer;
-}
 
 Report ParseReport(const std::string& oneLine)
 {
@@ -78,7 +56,7 @@ bool ReportIsSafeWithProblemDamper(const Report& r)
 		if (ReportIsSafe(reportCopy))
 		{
 			OutputReport(r);
-			std::cout << std::format(" is safe with index {} ({}) removed", index, r[index]) << std::endl;
+			Print(" is safe with index {} ({}) removed", index, r[index]);
 			return true;
 		}
 	}
@@ -89,13 +67,13 @@ bool ReportIsSafeWithProblemDamper(const Report& r)
 
 int main(int argc, char** args)
 {
-	std::cout << std::format("Day 2!") << std::endl;
+	Print("Day 2!");
 
 	std::filesystem::path inputPath = std::filesystem::absolute("data/day2/input.txt");
 	std::string inputData = LoadTextFile(inputPath);
 	if (inputData.length() == 0)
 	{
-		std::cout << std::format("Failed to open file {}", inputPath.string()) << std::endl;
+		Print("Failed to open file {}", inputPath.string());
 		return -1;
 	}
 
@@ -113,7 +91,7 @@ int main(int argc, char** args)
 			totalSafeWithDamper += ReportIsSafeWithProblemDamper(nextReport);
 		}
 	}
-	std::cout << std::format("{} Safe Reports, {} with damper", totalSafeReports, totalSafeReports + totalSafeWithDamper) << std::endl;
+	Print("{} Safe Reports, {} with damper", totalSafeReports, totalSafeReports + totalSafeWithDamper);
 
 	return 0;
 }

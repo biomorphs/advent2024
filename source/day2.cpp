@@ -39,6 +39,16 @@ Report ParseReport(const std::string& oneLine)
 	return newReport;
 }
 
+void OutputReport(const Report& r)
+{
+	std::cout << "{ ";
+	for (const auto& it : r)
+	{
+		std::cout << it << " ";
+	}
+	std::cout << "}";
+}
+
 bool ReportIsSafe(const Report& r)
 {
 	if (r.size() > 1)
@@ -58,14 +68,24 @@ bool ReportIsSafe(const Report& r)
 	return true;
 }
 
-void OutputReport(const Report& r)
+bool ReportIsSafeWithProblemDamper(const Report& r)
 {
-	for (const auto& it : r)
+	Report reportCopy;
+	for (int32_t index = 0; index < r.size(); ++index)
 	{
-		std::cout << it << " ";
+		reportCopy = r;
+		reportCopy.erase(reportCopy.begin() + index);
+		if (ReportIsSafe(reportCopy))
+		{
+			OutputReport(r);
+			std::cout << std::format(" is safe with index {} ({}) removed", index, r[index]) << std::endl;
+			return true;
+		}
 	}
-	std::cout << std::endl;
+	return false;
 }
+
+
 
 int main(int argc, char** args)
 {
@@ -82,14 +102,18 @@ int main(int argc, char** args)
 	std::stringstream allLines(inputData);
 	std::string oneLine;
 	int32_t totalSafeReports = 0;
+	int32_t totalSafeWithDamper = 0;
 	while (std::getline(allLines, oneLine))
 	{
 		Report nextReport = ParseReport(oneLine);
 		bool isSafe = ReportIsSafe(nextReport);
-		std::cout << (isSafe ? "Safe: " : "Unsafe: ");
-		OutputReport(nextReport);
 		totalSafeReports += isSafe;
+		if (!isSafe)
+		{
+			totalSafeWithDamper += ReportIsSafeWithProblemDamper(nextReport);
+		}
 	}
-	std::cout << std::format("{} Safe Reports", totalSafeReports) << std::endl;
+	std::cout << std::format("{} Safe Reports, {} with damper", totalSafeReports, totalSafeReports + totalSafeWithDamper) << std::endl;
+
 	return 0;
 }

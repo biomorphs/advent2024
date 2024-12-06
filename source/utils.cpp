@@ -19,3 +19,19 @@ std::string LoadTextFile(const std::filesystem::path& textPath)
 	}
 	return resultBuffer;
 }
+
+int32_t ForEachLine(const std::string& s, OneLineFn fn)
+{
+	int32_t lineCount = 0;
+	std::stringstream allLines(s);
+	std::string oneLine;
+	while (std::getline(allLines, oneLine))
+	{
+		++lineCount;
+		if (!fn(oneLine))
+		{
+			break;
+		}
+	}
+	return lineCount;
+}

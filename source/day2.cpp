@@ -5,10 +5,10 @@
 using Level = int32_t;
 using Report = std::vector<Level>;
 
-Report ParseReport(const std::string& oneLine)
+Report ParseReport(std::string_view oneLine)
 {
 	Report newReport;
-	auto stream = std::stringstream(oneLine);
+	auto stream = std::stringstream(oneLine.data());
 	Level nextLevel;
 	while (stream >> nextLevel)
 	{
@@ -75,11 +75,9 @@ int main(int argc, char** args)
 		return -1;
 	}
 
-	std::stringstream allLines(inputData);
-	std::string oneLine;
 	int32_t totalSafeReports = 0;
 	int32_t totalSafeWithDamper = 0;
-	while (std::getline(allLines, oneLine))
+	auto forEachLine = [&](std::string_view oneLine)
 	{
 		Report nextReport = ParseReport(oneLine);
 		bool isSafe = ReportIsSafe(nextReport);
@@ -88,7 +86,9 @@ int main(int argc, char** args)
 		{
 			totalSafeWithDamper += ReportIsSafeWithProblemDamper(nextReport);
 		}
-	}
+		return true;
+	};
+	ForEachLine(inputData, forEachLine);
 	Print("{} Safe Reports, {} with damper", totalSafeReports, totalSafeReports + totalSafeWithDamper);
 
 	return 0;

@@ -8,3 +8,6 @@ target_link_libraries(Day2 PRIVATE Utils)
 
 add_executable(Day3 day3.cpp)
 target_link_libraries(Day3 PRIVATE Utils)
+
+add_executable(Day4 day4.cpp)
+target_link_libraries(Day4 PRIVATE Utils)

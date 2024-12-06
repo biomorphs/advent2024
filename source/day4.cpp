@@ -76,6 +76,8 @@ bool FoundWord(std::string_view toFind, const WordGrid& grid,
 	return true;
 }
 
+constexpr int c_part = 2;
+
 int main(int argc, char** args)
 {
 	Print("Day 4!");
@@ -89,24 +91,52 @@ int main(int argc, char** args)
 	}
 
 	WordGrid inputGrid(inputData);
-	const auto toFind = "XMAS";
 	int32_t foundMatches = 0;
-	
-	for (int y = 0; y < inputGrid.m_height; ++y)
+
+	// part 1
+	if constexpr (c_part == 1)
 	{
-		for (int x = 0; x < inputGrid.m_width; ++x)
+		const auto toFind = "XMAS";
+		int32_t foundMatches = 0;
+		for (int y = 0; y < inputGrid.m_height; ++y)
 		{
-			// l/r
-			foundMatches += FoundWord(toFind, inputGrid, x, y, 1, 0);
-			foundMatches += FoundWord(toFind, inputGrid, x, y, -1, 0);
-			// u/d
-			foundMatches += FoundWord(toFind, inputGrid, x, y, 0, 1);
-			foundMatches += FoundWord(toFind, inputGrid, x, y, 0, -1);
-			// diagonals
-			foundMatches += FoundWord(toFind, inputGrid, x, y, 1, 1);
-			foundMatches += FoundWord(toFind, inputGrid, x, y, 1, -1);
-			foundMatches += FoundWord(toFind, inputGrid, x, y, -1, 1);
-			foundMatches += FoundWord(toFind, inputGrid, x, y, -1, -1);
+			for (int x = 0; x < inputGrid.m_width; ++x)
+			{
+				// l/r
+				foundMatches += FoundWord(toFind, inputGrid, x, y, 1, 0);
+				foundMatches += FoundWord(toFind, inputGrid, x, y, -1, 0);
+				// u/d
+				foundMatches += FoundWord(toFind, inputGrid, x, y, 0, 1);
+				foundMatches += FoundWord(toFind, inputGrid, x, y, 0, -1);
+				// diagonals
+				foundMatches += FoundWord(toFind, inputGrid, x, y, 1, 1);
+				foundMatches += FoundWord(toFind, inputGrid, x, y, 1, -1);
+				foundMatches += FoundWord(toFind, inputGrid, x, y, -1, 1);
+				foundMatches += FoundWord(toFind, inputGrid, x, y, -1, -1);
+			}
+		}
+	}
+
+	// part 2
+	if constexpr (c_part == 2)
+	{
+		for (int y = 0; y < inputGrid.m_height; ++y)
+		{
+			for (int x = 0; x < inputGrid.m_width; ++x)
+			{
+				if (inputGrid.At(x, y) == 'A')
+				{
+					int32_t foundMAS = 0;
+					foundMAS += FoundWord("MAS", inputGrid, x - 1, y - 1, 1, 1);
+					foundMAS += FoundWord("MAS", inputGrid, x + 1, y - 1, -1, 1);
+					foundMAS += FoundWord("MAS", inputGrid, x - 1, y + 1, 1, -1);
+					foundMAS += FoundWord("MAS", inputGrid, x + 1, y + 1, -1, -1);
+					if (foundMAS >= 2)
+					{
+						foundMatches++;
+					}
+				}
+			}
 		}
 	}
 

@@ -2,6 +2,8 @@
 #include <cassert>
 #include <map>
 
+constexpr int32_t c_part = 2;
+
 enum class SortType
 {
 	Before,
@@ -176,20 +178,47 @@ int main(int argc, char** args)
 	};
 	ForEachLine(inputData, populateData);
 
-	// Part 1, check if update pages match all rules 
 	int32_t middleValueSum = 0;
-	for (int updateIndex = 0; updateIndex < allUpdates.size(); ++updateIndex)
+	if constexpr (c_part == 1)
 	{
-		OutputUpdatePages(allUpdates[updateIndex]);
-		bool matchesRules = UpdateIsInOrderRefactor(allRules, allUpdates[updateIndex]);
-		std::cout << (matchesRules ? "\tMatch!" : "\tNo Match!") << std::endl;
-
-		// Find middle page
-		if (matchesRules)
+		// Part 1, sum all updates that match the rules
+		for (int updateIndex = 0; updateIndex < allUpdates.size(); ++updateIndex)
 		{
-			assert((allUpdates[updateIndex].size() % 2) != 0);
-			int32_t middleIndex = (static_cast<int32_t>(allUpdates[updateIndex].size()) - 1) / 2;
-			middleValueSum += allUpdates[updateIndex][middleIndex];
+			OutputUpdatePages(allUpdates[updateIndex]);
+			bool matchesRules = UpdateIsInOrderRefactor(allRules, allUpdates[updateIndex]);
+			std::cout << (matchesRules ? "\tMatch!" : "\tNo Match!") << std::endl;
+
+			// Find middle page
+			if (matchesRules)
+			{
+				assert((allUpdates[updateIndex].size() % 2) != 0);
+				int32_t middleIndex = (static_cast<int32_t>(allUpdates[updateIndex].size()) - 1) / 2;
+				middleValueSum += allUpdates[updateIndex][middleIndex];
+			}
+		}
+	}
+	else
+	{
+		// abuse sorting to fulfill constraints
+		auto fancySort = [&](const int32_t& p1, const int32_t& p2)
+		{
+			return p1 == p2 || PageOrderCorrect(allRules, p1, p2);
+		};
+
+		// Part 2, re-order badly sorted pages based on rules + sum middle page again
+		for (int updateIndex = 0; updateIndex < allUpdates.size(); ++updateIndex)
+		{
+			bool matchesRules = UpdateIsInOrderRefactor(allRules, allUpdates[updateIndex]);
+			if (!matchesRules)
+			{
+				auto fixedPages = allUpdates[updateIndex];
+				std::sort(fixedPages.begin(), fixedPages.end(), fancySort);
+				assert(UpdateIsInOrderRefactor(allRules, fixedPages));	// sanity check!
+
+				assert((fixedPages.size() % 2) != 0);
+				int32_t middleIndex = (static_cast<int32_t>(fixedPages.size()) - 1) / 2;
+				middleValueSum += fixedPages[middleIndex];
+			}
 		}
 	}
 

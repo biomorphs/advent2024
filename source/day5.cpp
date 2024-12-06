@@ -62,7 +62,7 @@ bool PageOrderCorrect(const SortRules& allRules, int32_t page1, int32_t page2)
 	return true;
 }
 
-bool UpdateIsInOrderRefactor(const SortRules& allRules, const UpdatePages& update)
+bool UpdateIsInOrder(const SortRules& allRules, const UpdatePages& update)
 {
 	for (int32_t index1 = 0; index1 < update.size(); ++index1)
 	{
@@ -75,48 +75,6 @@ bool UpdateIsInOrderRefactor(const SortRules& allRules, const UpdatePages& updat
 			else if (index1 > index2 && !PageOrderCorrect(allRules, update[index2], update[index1]))
 			{
 				return false;
-			}
-		}
-	}
-	return true;
-}
-
-bool UpdateIsInOrder(const SortRules& allRules, const UpdatePages& update)
-{
-	for (int32_t index1 = 0; index1 < update.size(); ++index1)
-	{
-		auto rulesFound = allRules.find(update[index1]);
-		if (rulesFound != allRules.end())
-		{
-			auto& entries = rulesFound->second.m_entries;
-			// check if every other page matches the rules
-			for (int32_t index2 = 0; index2 < update.size(); ++index2)
-			{
-				if (index1 != index2)
-				{
-					auto foundEntry = std::find_if(entries.begin(), entries.end(), [&](const SortEntry& thisEntry) {
-						return thisEntry.m_value == update[index2];
-					});
-					if (foundEntry != entries.end())
-					{
-						if (foundEntry->m_type == SortType::Before)
-						{
-							if (index2 > index1)
-							{
-								std::cout << std::format("\tFAIL -> {} should be before {}", update[index2], update[index1]) << std::endl;
-								return false;
-							}
-						}
-						else
-						{
-							if (index2 < index1)
-							{
-								std::cout << std::format("\tFAIL -> {} should be after {}", update[index2], update[index1]) << std::endl;
-								return false;
-							}
-						}
-					}
-				}
 			}
 		}
 	}
@@ -185,7 +143,7 @@ int main(int argc, char** args)
 		for (int updateIndex = 0; updateIndex < allUpdates.size(); ++updateIndex)
 		{
 			OutputUpdatePages(allUpdates[updateIndex]);
-			bool matchesRules = UpdateIsInOrderRefactor(allRules, allUpdates[updateIndex]);
+			bool matchesRules = UpdateIsInOrder(allRules, allUpdates[updateIndex]);
 			std::cout << (matchesRules ? "\tMatch!" : "\tNo Match!") << std::endl;
 
 			// Find middle page
@@ -208,12 +166,12 @@ int main(int argc, char** args)
 		// Part 2, re-order badly sorted pages based on rules + sum middle page again
 		for (int updateIndex = 0; updateIndex < allUpdates.size(); ++updateIndex)
 		{
-			bool matchesRules = UpdateIsInOrderRefactor(allRules, allUpdates[updateIndex]);
+			bool matchesRules = UpdateIsInOrder(allRules, allUpdates[updateIndex]);
 			if (!matchesRules)
 			{
 				auto fixedPages = allUpdates[updateIndex];
 				std::sort(fixedPages.begin(), fixedPages.end(), fancySort);
-				assert(UpdateIsInOrderRefactor(allRules, fixedPages));	// sanity check!
+				assert(UpdateIsInOrder(allRules, fixedPages));	// sanity check!
 
 				assert((fixedPages.size() % 2) != 0);
 				int32_t middleIndex = (static_cast<int32_t>(fixedPages.size()) - 1) / 2;

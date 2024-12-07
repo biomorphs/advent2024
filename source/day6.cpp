@@ -69,6 +69,8 @@ void RotateRightCW(int32_t& dirX, int32_t& dirY)
 	}
 }
 
+constexpr bool c_showGridProgress = false;
+
 int main(int argc, char** args)
 {
 	Print("Day 6!");
@@ -94,10 +96,9 @@ int main(int argc, char** args)
 	int32_t lookDirX = 0, lookDirY = 0;
 	GetLookDirection(grid.At(guardX, guardY), lookDirX, lookDirY);
 
+	// Part 1
 	using Coord = std::pair<int32_t, int32_t>;
 	std::set<Coord> visitedCoords;
-
-	constexpr bool c_showGridProgress = false;
 	while (true)
 	{
 		visitedCoords.insert({ guardX, guardY });
@@ -134,7 +135,84 @@ int main(int argc, char** args)
 		}
 	}
 
-	Print("Visited {} positions", visitedCoords.size());
+	Print("Part 1: Visited {} positions", visitedCoords.size());
 
+	// Part 2, same movement logic, but add obstacles at each coord + detect loops
+	// reset if the guard exits the grid or loops
+
+	using CoordAndDirection = std::tuple<int32_t, int32_t, int32_t, int32_t>;
+	std::set<CoordAndDirection> visitedCoordsAndDir;
+	std::vector<Coord> foundObstacles;	// obstacles that would cause a loop
+
+	for (int32_t obstacleY = 0; obstacleY < grid.m_height; obstacleY++)
+	{
+		for (int32_t obstacleX = 0; obstacleX < grid.m_width; obstacleX++)
+		{
+			// obstacle can't be at start position
+			if (obstacleX == startX && obstacleY == startY)
+			{
+				continue;
+			}
+			// dont replace existing obstacles
+			if (grid.At(obstacleX, obstacleY) == '#')
+			{
+				continue;
+			}
+
+			// reset guard to start position each time
+			guardX = startX;
+			guardY = startY;
+			lookDirX = 0;
+			lookDirY = -1;
+			while (true)
+			{
+				auto newCoordDir = CoordAndDirection(guardX, guardY, lookDirX, lookDirY);
+				if (visitedCoordsAndDir.find(newCoordDir) != visitedCoordsAndDir.end())
+				{
+					// a loop was detected!
+					Print("Obstacle at {},{} caused a loop!", obstacleX, obstacleY);
+					foundObstacles.push_back({obstacleX, obstacleY});
+					visitedCoordsAndDir.clear();
+					break;
+				}
+				visitedCoordsAndDir.insert(newCoordDir);
+
+				// move along look dir until we hit an obstacle or we walk out of the grid bounds
+				int32_t nextX = guardX + lookDirX;
+				int32_t nextY = guardY + lookDirY;
+				if (nextX < 0 || nextX >= grid.m_width || nextY < 0 || nextY >= grid.m_height)
+				{
+					visitedCoordsAndDir.clear();
+					break;	// walked out of the grid
+				}
+
+				if (c_showGridProgress)
+				{
+					auto gridCopy = grid;
+					for (const auto& c : visitedCoordsAndDir)
+					{
+						gridCopy.At(std::get<0>(c), std::get<1>(c)) = 'X';
+					}
+					gridCopy.At(obstacleX, obstacleY) = 'O';
+					gridCopy.At(nextX, nextY) = GuardChar(lookDirX, lookDirY);
+					gridCopy.Print();
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				}
+
+				if (grid.At(nextX, nextY) == '#' || (nextX == obstacleX && nextY == obstacleY))	// obstacle
+				{
+					RotateRightCW(lookDirX, lookDirY);
+				}
+				else
+				{
+					guardX = nextX;
+					guardY = nextY;
+				}
+			}
+		}
+	}
+
+	Print("Found {} total obstacles that cause loops!", foundObstacles.size());
+	
 	return 0;
 }

@@ -1,55 +1,7 @@
 #include "utils.h"
 #include <cassert>
 
-struct WordGrid {
-	std::vector<char> m_data;
-	int32_t m_width = 0;
-	int32_t m_height = 0;
-	int32_t GetIndex(int32_t x, int32_t y) const
-	{
-		assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
-		return x + (y * m_width);
-	}
-	char& At(int32_t x, int32_t y)
-	{
-		const auto index = GetIndex(x, y);
-		assert(index < m_data.size());
-		return m_data[index];
-	}
-	char At(int32_t x, int32_t y) const
-	{
-		const auto index = GetIndex(x, y);
-		assert(index < m_data.size());
-		return m_data[index];
-	}
-	WordGrid() = default;
-	WordGrid(const std::string& inputText)
-	{
-		auto countDimensions = [&](std::string_view oneLine)
-		{
-			m_width = static_cast<int32_t>(oneLine.length());
-			return true;	// count all lines
-		};
-		m_height = ForEachLine(inputText, countDimensions);
-		m_data.resize(m_width * m_height);
-		
-		int32_t y = 0;
-		auto populate = [&](std::string_view oneLine)
-		{
-			const auto lineLen = oneLine.length();
-			for (int32_t x = 0; x < m_width; ++x)
-			{
-				assert(x < lineLen);
-				At(x, y) = oneLine[x];
-			}
-			++y;
-			return true;
-		};
-		ForEachLine(inputText, populate);
-	}
-};
-
-bool FoundWord(std::string_view toFind, const WordGrid& grid,
+bool FoundWord(std::string_view toFind, const CharGrid& grid,
 	int32_t startX, int32_t startY, int32_t xDir, int32_t yDir)
 {
 	const int32_t findLen = static_cast<int32_t>(toFind.length());
@@ -90,7 +42,7 @@ int main(int argc, char** args)
 		return -1;
 	}
 
-	WordGrid inputGrid(inputData);
+	CharGrid inputGrid(inputData);
 	int32_t foundMatches = 0;
 
 	// part 1

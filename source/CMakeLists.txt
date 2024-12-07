@@ -14,3 +14,6 @@ target_link_libraries(Day4 PRIVATE Utils)
 
 add_executable(Day5 day5.cpp)
 target_link_libraries(Day5 PRIVATE Utils)
+
+add_executable(Day6 day6.cpp)
+target_link_libraries(Day6 PRIVATE Utils)
